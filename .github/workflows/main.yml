@@ -56,4 +56,4 @@ jobs:
       - name: Deploy helm chart
         uses: WyriHaximus/github-action-helm3@v3
         with:
-          exec: helm upgrade --install nginx-chart .
+          exec: helm upgrade --install nginx-chart . --namespace helm-nginx
