@@ -7,7 +7,7 @@ metadata:
   namespace: helm-nginx
   labels:
     helm.sh/chart: helm-chart-0.1.0
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
@@ -29,11 +29,11 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-chart
+  name: nginx
   namespace: helm-nginx
   labels:
     helm.sh/chart: helm-chart-0.1.0
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
@@ -45,31 +45,31 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
 ---
 # Source: helm-chart/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-chart
+  name: nginx
   namespace: helm-nginx
   labels:
     helm.sh/chart: helm-chart-0.1.0
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: nginx
+      app.kubernetes.io/name: helm-chart
       app.kubernetes.io/instance: nginx-chart
   template:
     metadata:
       labels:
         helm.sh/chart: helm-chart-0.1.0
-        app.kubernetes.io/name: nginx
+        app.kubernetes.io/name: helm-chart
         app.kubernetes.io/instance: nginx-chart
         app.kubernetes.io/version: "1.16.0"
         app.kubernetes.io/managed-by: Helm
@@ -115,11 +115,11 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: nginx-chart
+  name: nginx
   namespace: helm-nginx
   labels:
     helm.sh/chart: helm-chart-0.1.0
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
@@ -127,7 +127,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: nginx-chart
+    name: nginx
   minReplicas: 1
   maxReplicas: 100
   metrics:
@@ -148,11 +148,11 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-chart
+  name: nginx
   namespace: helm-nginx
   labels:
     helm.sh/chart: helm-chart-0.1.0
-    app.kubernetes.io/name: nginx
+    app.kubernetes.io/name: helm-chart
     app.kubernetes.io/instance: nginx-chart
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
@@ -161,16 +161,16 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "nginx-amartha.dev.amartha.id"
-      secretName: nginx-amartha-dev-amartha-id-tls
+        - "nginx.anyer.site"
+      secretName: nginx-anyer-site-tls
   rules:
-    - host: "nginx-amartha.dev.amartha.id"
+    - host: "nginx.anyer.site"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: nginx-chart
+                name: nginx
                 port:
                   number: 80

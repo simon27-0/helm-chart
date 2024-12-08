@@ -18,14 +18,14 @@ jobs:
 
       - name: Render Helm chart template
         run: |
-          helm template nginx-chart helm-chart/ -f helm-chart/values.yaml > rendered-output.yaml
+          helm template nginx-chart . -f values.yaml > rendered-output.yaml
 
       - name: Install diff tool
         run: sudo apt-get install -y diffutils
 
       - name: Compare expected vs rendered values
         run: |
-          diff helm-chart/expected-value.yaml rendered-output.yaml || echo "Differences found!"
+          diff expected-value.yaml rendered-output.yaml || echo "Differences found!"
 
   deploy_helm_chart:
     name: Deploy Helm Chart
