@@ -1,0 +1,176 @@
+---
+# Source: helm-chart/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-sa-test
+  namespace: helm-nginx
+  labels:
+    helm.sh/chart: helm-chart-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+---
+# Source: helm-chart/templates/cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-chart-cm
+  namespace: helm-nginx
+data:
+  nginx-test.conf: |
+    # example config
+    example
+    test
+---
+# Source: helm-chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-chart
+  namespace: helm-nginx
+  labels:
+    helm.sh/chart: helm-chart-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+---
+# Source: helm-chart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-chart
+  namespace: helm-nginx
+  labels:
+    helm.sh/chart: helm-chart-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nginx
+      app.kubernetes.io/instance: nginx-chart
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: helm-chart-0.1.0
+        app.kubernetes.io/name: nginx
+        app.kubernetes.io/instance: nginx-chart
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: nginx-sa-test
+      securityContext:
+        {}
+      containers:
+        - name: helm-chart
+          securityContext:
+            {}
+          image: "nginx:1.16.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /etc/nginx/test-dir
+              name: nginx-config
+              readOnly: true
+      volumes:
+        - configMap:
+            name: nginx-chart-cm
+          name: nginx-config
+---
+# Source: helm-chart/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-chart
+  namespace: helm-nginx
+  labels:
+    helm.sh/chart: helm-chart-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-chart
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+# Source: helm-chart/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-chart
+  namespace: helm-nginx
+  labels:
+    helm.sh/chart: helm-chart-0.1.0
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/instance: nginx-chart
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - "nginx-amartha.dev.amartha.id"
+      secretName: nginx-amartha-dev-amartha-id-tls
+  rules:
+    - host: "nginx-amartha.dev.amartha.id"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-chart
+                port:
+                  number: 80
