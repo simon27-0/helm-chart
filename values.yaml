@@ -13,8 +13,8 @@ image:
   tag: ""
 
 imagePullSecrets: []
-nameOverride: "nginx"
-fullnameOverride: ""
+nameOverride: ""
+fullnameOverride: "nginx"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -51,14 +51,14 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: nginx-amartha.dev.amartha.id
+    - host: nginx.anyer.site
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: nginx-amartha-dev-amartha-id-tls
+    - secretName: nginx-anyer-site-tls
       hosts:
-        - nginx-amartha.dev.amartha.id
+        - nginx.anyer.site
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
